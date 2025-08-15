@@ -107,6 +107,7 @@ func (r *SnapshotPodTaskReconciler) reconcilePushImage(ctx context.Context, spt 
 }
 
 func (r *SnapshotPodTaskReconciler) reconcileCommit(ctx context.Context, spt *snapshotpodv1alpha1.SnapshotPodTask) error {
+	fmt.Println("||||spt.Spec.ContainerID", spt.Spec.ContainerID)
 	_, rt, cid, err := r.getRuntimeAndContainerID(spt.Spec.ContainerID)
 	if err != nil {
 		return err
@@ -204,7 +205,10 @@ func (r *SnapshotPodTaskReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			continue
 		}
 		if err := rec.r(ctx, &spt); err != nil {
-			logger.Error(err, "run reconcile task error", "type", rec.typ, "namespace", spt.Namespace, "name", spt.Name)
+			fmt.Println("||||", err.Error())
+			if !errors.IsNotFound(err) || !strings.Contains(err.Error(), "not exists") {
+				logger.Error(err, "run reconcile task error", "type", rec.typ, "namespace", spt.Namespace, "name", spt.Name)
+			}
 			spt.Status.Conditions[i].Status = metav1.ConditionFalse
 			spt.Status.Conditions[i].Message = err.Error()
 			lastError = err

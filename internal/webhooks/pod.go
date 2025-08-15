@@ -40,6 +40,7 @@ func (p *PodImageWebhookAdmission) SetupWebhookWithManager(mgr manager.Manager) 
 }
 
 func (p *PodImageWebhookAdmission) Handle(ctx context.Context, request admission.Request) admission.Response {
+	fmt.Println("||||", request.Operation)
 	podGVR := metav1.GroupVersionResource{
 		Group:    "",
 		Version:  "v1",
@@ -145,7 +146,7 @@ func (p *PodImageWebhookAdmission) handlePodUpdate(ctx context.Context, ns strin
 		klog.Infof("no auto save for pod %s/%s", ns, pod.Name)
 		return 0, nil
 	}
-
+	// 某些时候不能更新这个TriggerRound, 比如从镜像恢复
 	sp.Spec.TriggerRound += 1
 	err = p.Update(ctx, &sp)
 	return sp.Spec.TriggerRound, err

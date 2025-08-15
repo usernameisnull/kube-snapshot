@@ -356,7 +356,9 @@ func (r *SnapshotPodReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 		old := sp.Status.Conditions[i]
 		if err := rec.r(ctx, &sp); err != nil {
-			logger.Error(err, "run reconcile error", "type", rec.typ, "namespace", sp.Namespace, "name", sp.Name)
+			if !errors.IsNotFound(err) {
+				logger.Error(err, "run reconcile error", "type", rec.typ, "namespace", sp.Namespace, "name", sp.Name)
+			}
 			sp.Status.Conditions[i].Status = metav1.ConditionFalse
 			sp.Status.Conditions[i].Message = err.Error()
 			break
